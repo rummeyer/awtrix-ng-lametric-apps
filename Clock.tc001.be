@@ -14,7 +14,7 @@
 import string
 import math
 class Clock
-var fg, tc, ic, io, tall, pc, hm, cells, cq, qnow, shown, sec, sep, font2, wk, monday, today, other
+var fg, tc, ic, io, tall, pc, hm, cells, cq, qnow, shown, sec, sep, font, wk, monday, today, other
 def init()
 self.fg = settings.get("textColor")
 if self.fg == nil self.fg = 0xFFFFFF end
@@ -36,9 +36,8 @@ self.wk = store.get("weekday")
 self.monday = store.get("monday")
 self.today = store.get("today")
 self.other = store.get("other")
-self.font2 = [[3, 0, 7, 5, 5, 5, 7], [3, 0, 2, 6, 2, 2, 7], [3, 0, 7, 1, 7, 4, 7], [3, 0, 7, 1, 7, 1, 7],
-[3, 0, 5, 5, 7, 1, 1], [3, 0, 7, 4, 7, 1, 7], [3, 0, 7, 4, 7, 5, 7], [3, 0, 7, 1, 1, 1, 1],
-[3, 0, 7, 5, 7, 5, 7], [3, 0, 7, 5, 7, 1, 7], [1, 1, 1, 0, 1], [3, 2, 7]]
+self.font = [60073275, 59262483, 59826491, 59040059, 8709419, 59040827, 60089403, 8659259, 60089659,
+59041083, 262401, 57347]
 end
 def quiet()
 if !store.get("quiet") || epoch_ms() < 0 return false end
@@ -155,19 +154,21 @@ var w = 0
 var n = size(cells)
 var i = 0
 while i < n
-var g = self.font2[cells[i][0]]
+var g = self.font[cells[i][0]]
+var gw = g & 7
 if d
-var r = 2
-while r < size(g)
+var r = 0
+while r < 5
+var bits = (g >> (3 + 5 * r)) & 31
 var b = 0
-while b < g[0]
-if g[r] & (1 << (g[0] - 1 - b)) rect_fill(x + w + b * 2, y + (g[1] + r - 2) * 2, 2, 2, cells[i][1]) end
+while bits != 0 && b < gw
+if bits & (1 << (gw - 1 - b)) rect_fill(x + w + b * 2, y + r * 2, 2, 2, cells[i][1]) end
 b += 1
 end
 r += 1
 end
 end
-w += g[0] * 2
+w += gw * 2
 if i + 1 < n w += cells[i][0] == 10 || cells[i + 1][0] == 10 ? cg : 2 end
 i += 1
 end

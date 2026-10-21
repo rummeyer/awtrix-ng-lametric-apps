@@ -65,7 +65,7 @@ source, so these copies leave out the comments, the indentation and the
 settings' help texts. [`tc001.py`](tc001.py) makes them from the scripts:
 run `python3 tc001.py` after changing one.
 
-They still cost about 13 KB (Clock) and 20 KB (Weather). Beside the Netatmo
+They still cost about 11 KB (Clock) and 20 KB (Weather). Beside the Netatmo
 app, which takes 29 KB and needs a large piece of memory for its encrypted
 connection, there is room for the Clock but not the Weather: with both,
 Netatmo cannot reach its server any more. If saving a script makes the
