@@ -1,8 +1,8 @@
 # @name    Clock
-# @desc    The time beside an icon with the weekday under it, as LaMetric's Alarm Clock
+# @desc    The time beside LaMetric's flame with the weekday under it, as LaMetric's Alarm Clock
 # @author  Oliver Rummeyer
 # @version 2.0
-# @config  icon    text   "Icon"           default="7756" help="A LaMetric icon number or an icon's name on the clock; empty shows the time with seconds"
+# @config  showicon bool  "Icon"           default=true help="LaMetric's flame beside the time; off shows the time with seconds"
 # @config  weekday bool   "Weekday"        default=true help="The days of the week under the time"
 # @config  monday  bool   "Week starts Monday" default=true group="Weekday"
 # @config  today   color  "Today"          default=#FFFFFF group="Weekday"
@@ -14,14 +14,14 @@
 import string
 import math
 
-# The time beside an icon with the days of the week under it, as LaMetric's Alarm Clock, laid out
-# as the clock's own Time app: 16 rows high, as the TC002's, the small font at twice its size beside
-# the icon where the Time app has its calendar sheet; 8 rows high, as the TC001's, the small font
-# beside an 8×8 icon. Without an icon the time with seconds across the display. 24 or 12 hours,
+# The time beside LaMetric's flame, 7756, with the days of the week under it, as LaMetric's Alarm
+# Clock, laid out as the clock's own Time app: 16 rows high, as the TC002's, the small font at twice
+# its size beside the icon where the Time app has its calendar sheet; 8 rows high, as the TC001's,
+# the small font beside it. Without the icon the time with seconds across the display. 24 or 12 hours,
 # leading zero and the colon follow the clock's time settings. In the quiet hours only HH:MM in the
 # middle of the display, and the display dimmed while it is shown.
 class Clock
-  var fg, tc, ic, url, tall, pc, hm, cells, cq, qnow, shown, sec, sep, glyph, font2, wk, monday, today, other
+  var fg, tc, ic, io, tall, pc, hm, cells, cq, qnow, shown, sec, sep, font2, wk, monday, today, other
 
   def init()
     self.fg = settings.get("textColor")
@@ -29,14 +29,25 @@ class Clock
     self.tc = settings.get("timeColor")
     if self.tc == nil self.tc = self.fg end
     self.tall = height() > 8
-    # A number is an icon from LaMetric's gallery, drawn from its address where the clock can (the
-    # TC002), else installed on the clock under that number (the TC001); a name, an icon on the clock.
-    var m = re.search("^ *([^ ]*)", str(store.get("icon")))
-    self.ic = m == nil || m[1] == "" ? nil : m[1]
-    self.url = nil
-    if self.ic != nil && re.match("^[0-9]+$", self.ic) != nil
-      self.url = "https://developer.lametric.com/content/apps/icon_thumbs/" + self.ic
-    end
+    # The icon comes with the script, as small as a GIF goes while it plays the same; literals side by
+    # side are one string, so it is held once. 16 rows high at its 8×8 in the middle of the square.
+    self.ic = "data:image/gif;base64,R0lGODlhCAAIAIQAAAAAAAAAAJwCBLwCBMRyBNxWHOxaHPT+JPwCBPwaHPxeLPx6HP"
+              "yGBPyODPySBPyWPPyaDPyeHPyiHPymHPyyHPyyJPy2BPy2DPy6HPy+DPy+FPzCFPzSBPzyBAAAAAAAACH5BAUKAA"
+              "AALAAAAAAGAAgAAAUZICAiYomQ4zkqSnIWEaWc0XGcSHFEKEKhIQAh+QQFCgAAACwBAAEABgAGAAAFEGACjGSJjJ"
+              "GCHiUZkdRRjCEAIfkEBQoAAAAsAAAAAAcABwAABRYgAowkEIgBkJRjOirrWGAaO4rkEeEhACH5BAUKAAAALAAAAA"
+              "AHAAYAAAUUYAAg4miWIgIApbqyQBEdivtObwgAIfkEBQoAAAAsAQAAAAYABwAABREgEADkSJ5oeh5SU6DSGb9kCA"
+              "Ah+QQFCgAAACwAAAEABQAHAAAFFSAQAAhgmiXwoI91KIABTGYBRCdhhgAh+QQFCgAAACwAAAAABQAIAAAFESAgIm"
+              "JpAsFZAIcjrtFZxkAIACH5BAUKAAAALAAAAgAGAAYAAAUPICACyAgsZLkcI2q+oguEACH5BAUKAAAALAAAAQAFAA"
+              "YAAAUQIAAEACKeJLCdq1iIFbCcIQAh+QQFCgAAACwBAAIAAQABAAAFA2AQAgAh+QQFCgAAACwCAAIAAgAGAAAFCi"
+              "BQAQdgdkBRACEAIfkEBQoAAAAsAQAAAAUABgAABRAgACSJWIlot5TnCizniAIhACH5BAUKAAAALAAAAQAGAAcAAA"
+              "UTIAAU3FGIIocCixigXHuya52gIQAh+QQFCgAAACwAAAAABwAGAAAFFCAgAscyJuKCpuNYAC+QFCYarGsIACH5BA"
+              "UKAAAALAIAAAAFAAgAAAUUIBAAXBIsACQiKAK8ryrCMwoLdAgAIfkEBQoAAAAsAAAAAAcACAAABRsgIALQkY3IMo"
+              "qBAARAgrDjdQFziooMd6+FVQgAIfkEBQoAAAAsAAAAAAcACAAABRcgIAIBsIxBUgAJgIxwbMpiNl4HF79jCAAh+Q"
+              "QFCgAAACwAAAAABwAHAAAFFiAgikmRjIGYAkkgjMXCkQB3jPiV4yEAIfkEBQoAAAAsAAAAAAcABwAABRRgAoxjEp"
+              "CAMKDASXILWbBARh9sCAAh+QQFCgAAACwBAAAABgAHAAAFFCAgAsIgIkAQjGxysmMBHJmYcWwIACH5BAUKAAAALA"
+              "IAAAAFAAcAAAUQIIAAQTACKHoCSwpwrnu4IQA7"
+    if !store.get("showicon") self.ic = nil end
+    self.io = self.tall ? 4 : 0
     # The time in pieces for text(), and 16 rows high as cells for big(); dashes until the clock
     # knows the time.
     self.pc = self.ic == nil ? [["--", 0], [":", 0], ["--", 0], [":", 0], ["--", 0]] : [["--", 0], [":", 0], ["--", 0]]
@@ -51,10 +62,6 @@ class Clock
     self.monday = store.get("monday")
     self.today = store.get("today")
     self.other = store.get("other")
-    # A clock face for an icon that cannot be found, 8×8: per colour a row per number, the leftmost
-    # pixel the highest bit.
-    self.glyph = [[0xC8C8C8, 0x38, 0x44, 0x82, 0x82, 0x82, 0x44, 0x38, 0x00],
-                  [0xFF3020, 0x00, 0x00, 0x10, 0x18, 0x00, 0x00, 0x00, 0x00]]
     # The clock's small font for big(), the characters of "0123456789:-": ink width, rows from the
     # cap top, then a row per number, the leftmost pixel the highest bit.
     self.font2 = [[3, 0, 7, 5, 5, 5, 7], [3, 0, 2, 6, 2, 2, 7], [3, 0, 7, 1, 7, 4, 7], [3, 0, 7, 1, 7, 1, 7],
@@ -115,11 +122,7 @@ class Clock
       # Where the Time app has its calendar sheet: 15 columns and a gap 16 rows high, else 8 and a gap
       x0 = self.tall ? 17 : 9
       aw = self.tall ? 34 : width() - 9
-      # The clock fills a square as high as the display with a still icon from an address, and plays
-      # an animated one at its own size in the middle of that square.
-      if !(self.url != nil && icon(self.url, 0, 0)) && !icon(self.ic, 0, 0)
-        self.face(self.tall ? 2 : 1)
-      end
+      icon(self.ic, self.io, self.io)
     end
     var pc = q ? self.hm : self.pc
     var s = second()
@@ -215,21 +218,6 @@ class Clock
       i += 1
     end
     return w
-  end
-
-  # The clock face in the icon's place, each pixel s×s.
-  def face(s)
-    for l : self.glyph
-      var r = 0
-      while r < 8
-        var b = 0
-        while b < 8
-          if l[r + 1] & (0x80 >> b) rect_fill(b * s, r * s, s, s, l[0]) end
-          b += 1
-        end
-        r += 1
-      end
-    end
   end
 end
 return Clock()

@@ -5,20 +5,20 @@ TC002 or TC001, in place of the LaMetric Time's
 [Alarm Clock](https://apps.lametric.com/apps/alarm_clock), without the alarm,
 and [Weather](https://apps.lametric.com/apps/weather).
 
-**Clock** ([`Clock.be`](Clock.be)): the time beside an icon, the days of the
-week under it, laid out as the clock's own Time app. On the TC002 the icon
-takes the place of the Time app's calendar sheet, and the time the same
-double-size digits beside it:
+**Clock** ([`Clock.be`](Clock.be)): the time beside LaMetric's flame, 7756,
+the days of the week under it, laid out as the clock's own Time app. On the
+TC002 the flame takes the place of the Time app's calendar sheet, and the
+time the same double-size digits beside it:
 
 ```
  ┌────────┐ ██ ██   ██ ██
- │  icon  │  █ ██ ▪  █  █
+ │ flame  │  █ ██ ▪  █  █
  │ 16×16  │  █  █ ▪  █  █
  └────────┘ ▬▬ ▬▬ ██ ▬▬ ▬▬ ▬▬ ▬▬
 ```
 
-On the TC001 the icon is 8×8 and the time in the small font beside it.
-Without an icon it shows the time with seconds across the whole display.
+On the TC001 the time is in the small font beside it. With the icon
+switched off it shows the time with seconds across the whole display.
 
 **Weather** ([`Weather.be`](Weather.be)): four pages, each one of LaMetric's
 icons and its value, as on the LaMetric:
@@ -30,12 +30,12 @@ icons and its value, as on the LaMetric:
 | A falling drop, 1167 | the humidity |
 | A windsock, 3363 | the wind speed, halfway giving way to where it comes from, N, NE, E … |
 
-The icons have to be on the clock, on the TC002 too, so that still and
-animated ones keep the same 8×8: [`install-icons.py`](install-icons.py) puts
-them there (see Installing). On the TC002 they stand in the middle of the
-16×16 square and the values are twice the size of the small font where they
-fit; on the TC001 the small font. Halfway through a page with two values the
-first slides out at the bottom and the second in from the top.
+The icons come with the scripts, made as small as GIFs go while they play
+the same, about 7 KB for all of them; nothing is fetched from LaMetric or
+installed. On the TC002 they stand in the middle of the 16×16 square and the
+values are twice the size of the small font where they fit; on the TC001 the
+small font. Halfway through a page with two values the first slides out at
+the bottom and the second in from the top.
 
 The weather comes from [Open-Meteo](https://open-meteo.com), which needs no
 key or account. The pages slide down one after the other.
@@ -58,20 +58,19 @@ You will want to switch off the clock's own **Time** app, and on the TC001
 **Temperature** and **Humidity** too, so the rotation does not show them
 twice.
 
-**The icons.** The Weather's icons have to be on the clock, and on a TC001,
-which cannot draw pictures from a web address, the Clock's too.
-[`install-icons.py`](install-icons.py) puts them there: it reads the Clock's
-icon from its settings, takes the Weather's icons when that app is
-installed, and installs every one the clock does not have yet, a still PNG
-turned into a GIF. It needs Python 3 and nothing else and leaves installed
-icons alone, so it can run after every change of the icon:
+**On a TC001** install [`Clock.tc001.be`](Clock.tc001.be) and
+[`Weather.tc001.be`](Weather.tc001.be) instead. A TC001 shares 96 KB among its
+scripts, and a script compiles only into memory in one piece as large as its
+source, so these copies leave out the comments, the indentation and the
+settings' help texts. [`tc001.py`](tc001.py) makes them from the scripts:
+run `python3 tc001.py` after changing one.
 
-```sh
-python3 install-icons.py <awtrix-ip>
-```
-
-Until then the TC001 shows a little clock face in the Clock's icon's place,
-and the Weather leaves the icons out.
+They still cost about 13 KB (Clock) and 20 KB (Weather). Beside the Netatmo
+app, which takes 29 KB and needs a large piece of memory for its encrypted
+connection, there is room for the Clock but not the Weather: with both,
+Netatmo cannot reach its server any more. If saving a script makes the
+clock restart and keep the old version, delete the app, restart the clock
+and install it again.
 
 ## Settings
 
@@ -81,7 +80,7 @@ On the **Apps** tab, the gear button on the app's row.
 
 | Setting | Default | |
 |---|---|---|
-| Icon | `7756` | A number from the [LaMetric icon gallery](https://developer.lametric.com/icons), or an icon's name on the clock. Empty shows the time with seconds. |
+| Icon | on | LaMetric's flame beside the time. Off shows the time with seconds. |
 | Weekday | on | The days of the week under the time. |
 | Week starts Monday | on | Off starts it on Sunday. |
 | Today / Other days | white / grey | The colours of the weekday bars, those of the Time app. |
@@ -91,15 +90,6 @@ On the **Apps** tab, the gear button on the app's row.
 24 or 12 hours, the leading zero, the colon (steady, blinking or pulsing) and
 the time's colour are the clock's own time settings. The Clock stays as long
 as any app.
-
-**Icons** are numbers from the [LaMetric icon gallery](https://developer.lametric.com/icons):
-the TC002 draws them from
-`https://developer.lametric.com/content/apps/icon_thumbs/<number>`, a still
-one filling the 16×16 square, an animated one at its own 8×8 in the middle
-of it,. On a TC001 the number names an icon installed on the clock, shown at
-8×8 (see Installing). Any other name is an icon on the clock, such as one
-installed from the [AWTRIX Hub](https://awtrix.de/icons). An icon that
-cannot be found gets a clock face.
 
 **Weather**
 
@@ -120,7 +110,7 @@ rotation until a new one comes.
 
 ## Licence
 
-MIT. The default icon is from the [LaMetric icon gallery](https://developer.lametric.com/icons)
-and belongs to its author; the double-size digits are the clock's small font
+MIT. The icons are from the [LaMetric icon gallery](https://developer.lametric.com/icons)
+and belong to their authors; the double-size digits are the clock's small font
 (SIL OFL 1.1, see the AWTRIX NG font notices); the weather is by
 [Open-Meteo](https://open-meteo.com) (CC BY 4.0).

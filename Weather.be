@@ -15,26 +15,119 @@ import string
 
 # The weather from Open-Meteo, as LaMetric's Weather and with LaMetric's icons, a page each: the
 # sky with the temperature, a thermometer with the day's low and high, a drop with the humidity,
-# and a windsock with the wind speed giving way to where it comes from. The icons are installed on
-# the clock by install-icons.py and drawn at their 8×8, 16 rows high, as on the TC002, in the
-# middle of the 16×16 square, with text at twice its size, as the clock draws its own apps there;
-# 8 rows high, as on the TC001, at the left edge with the small font. The pages slide down one after
+# and a windsock with the wind speed giving way to where it comes from. The icons come with the
+# script and are drawn at their 8×8, 16 rows high, as on the TC002, in the middle of the 16×16
+# square, with text at twice its size, as the clock draws its own apps there; 8 rows high, as on
+# the TC001, at the left edge with the small font. The pages slide down one after
 # the other.
 class Weather
-  var fg, tall, font2, unit, deg, url, wx, wat, fx, sky, slots, t0, ticks, busy
+  var fg, tall, font, gif, unit, deg, url, wx, wat, fx, sky, slots, t0, ticks, busy
 
   def init()
     self.fg = settings.get("textColor")
     if self.fg == nil self.fg = 0xFFFFFF end
     self.tall = height() > 8
-    # The clock's small font for big(), the characters of "0123456789:-'%/NESWCF" (' the degree):
-    # ink width, rows from the cap top, then a row per number, the leftmost pixel the highest bit.
-    self.font2 = [[3, 0, 7, 5, 5, 5, 7], [3, 0, 2, 6, 2, 2, 7], [3, 0, 7, 1, 7, 4, 7], [3, 0, 7, 1, 7, 1, 7],
-                  [3, 0, 5, 5, 7, 1, 1], [3, 0, 7, 4, 7, 1, 7], [3, 0, 7, 4, 7, 5, 7], [3, 0, 7, 1, 1, 1, 1],
-                  [3, 0, 7, 5, 7, 5, 7], [3, 0, 7, 5, 7, 1, 7], [1, 1, 1, 0, 1], [3, 2, 7], [2, 0, 3, 3],
-                  [3, 0, 5, 1, 2, 4, 5], [3, 0, 1, 1, 2, 4, 4], [4, 0, 9, 13, 11, 9, 9], [3, 0, 7, 4, 7, 4, 7],
-                  [3, 0, 7, 4, 7, 1, 7], [5, 0, 17, 17, 17, 21, 10], [3, 0, 2, 5, 4, 5, 2], [3, 0, 7, 4, 7, 4, 4]]
-    # Open-Meteo, no key needed: the current weather and the day's low and high
+    # The clock's small font for big(), the characters of "0123456789:-'%/NESWCF" (' the degree), a
+    # number each: the ink width in the lowest 3 bits, then 5 rows of 5 bits from the cap top, the
+    # leftmost pixel the highest bit.
+    self.font = [60073275, 59262483, 59826491, 59040059, 8709419, 59040827, 60089403, 8659259, 60089659,
+                 59041083, 262401, 57347, 794, 43008299, 34619659, 77950284, 59827259, 59040827, 89534861,
+                 18122003, 34661435]
+    # LaMetric's icons by their number, made as small as GIFs go while they play the same: one
+    # colour table, identical frames merged, each frame only what changed. Literals side by side are
+    # one string, so each is held once.
+    self.gif = {
+      # 2282 sunny
+      "2282": "data:image/gif;base64,R0lGODlhCAAIAIIAAAAAAAAAAExGBKSeBMzCBPz2BPz2lPz61CH5BAUCAAAALAAAAA"
+              "AIAAgAAAMaCCBEoqCV0haZ5biLp5zHNDCh90gaATGOkgAAIfkEBQoAAAAsAgABAAQABgAAAwkIB8ylbL0HwUsAIf"
+              "kEBQoAAAAsAQADAAYAAwAAAwh4UABaqskFEgAh+QQFCgAAACwBAAEABgAGAAADCwhQqtcLvBjnhDcBACH5BAUKAA"
+              "AALAEAAQAFAAYAAAMLCHAKtfA19SQDhiUAIfkEBQoAAAAsAQADAAQABAAAAwhYsMfQC5SSAAAh+QQFCgAAACwBAA"
+              "EABgAGAAADCwhQ2v7rLCDZVFIlADs=",
+      # 2285 night
+      "2285": "data:image/gif;base64,R0lGODlhCAAIAIMAAAAAAAAAAAQCFAQCHAQCLAQCNAQCRAQCVAQCZCwuLGxubLS2tP"
+              "z+/AAAAAAAAAAAACH5BAUKAAAALAAAAAAIAAgAAAQYUMhJ6xrjYky670UohkZplkeqpgiytHAEACH5BAUKAAAALA"
+              "AAAAAIAAgAAAQPEMiZQJ1SZcy7pZ8namEEACH5BAUKAAAALAAAAAAIAAgAAAQPEMipQJ0yZcy7pZ8namEEACH5BA"
+              "UKAAAALAAAAAAIAAgAAAQQEMi5QJ1SyIG7txT4jYh0RQAh+QQFCgAAACwAAAAACAAIAAAEEBDIyUCdMmVMsJeXJX"
+              "7kNkYAIfkEBQoAAAAsAAAAAAgACAAABBIQyLlAnVJlPLCXlyV+kvFpYwQAIfkEBQoAAAAsAAAAAAgACAAABBMQyJ"
+              "lAnZJlTLCXlyV+0jEZ2xgBADs=",
+      # 2286 partly cloudy
+      "2286": "data:image/gif;base64,R0lGODlhCAAIAIMAAAAAAAAAAERCRFRWBGxSBGxubKSipMS+BMTGxOTm5Pz6BAAAAA"
+              "AAAAAAAAAAAAAAACH5BAUKAAAALAAAAAAIAAgAAAQeEIBxzpCgKiXE7FySdAgilKWhrqpQvLDXzZ5EWVIEACH5BA"
+              "UKAAAALAAAAQAIAAYAAAQTEEh5gABVqJvORRc1jUM4FdhoRQAh+QQFCgAAACwBAAEABgAGAAAEEBBIeYACQmUBEL"
+              "8TcHBhNUUAIfkEBQoAAAAsAgABAAYABgAABBAQSBmAAuIIJQDq12R1YihFACH5BAUKAAAALAMAAgAFAAUAAAQNEC"
+              "ggghIAiQn67R4YAQAh+QQFCgAAACwEAAIABAAFAAAECxAoIJQAaAJ599kRACH5BAUKAAAALAUAAgACAAUAAAQHEB"
+              "wlFKAyAgAh+QQFCgAAACwGAAIAAgAFAAAECBAMJRQ4ApAIACH5BAUKAAAALAcAAwABAAQAAAQE8JwRIgAh+QQFCg"
+              "AAACwAAAIAAQAEAAAEBFAgIyIAIfkEBQoAAAAsAAABAAIABgAABAhQgCQRMEXICAAh+QQFCgAAACwBAAEAAgAGAA"
+              "AECFCAJBEwRcgIACH5BAUKAAAALAAAAQAEAAYAAAQNMAAxQaIAoAxMLhgVAQAh+QQFCgAAACwAAAEABQAGAAAEDx"
+              "AEIGRNogKA9jZeoVFABAAh+QQFCgAAACwAAAEABgAGAAAEETCcIwSlKQm0kTdgWIxjZVoRACH5BAUKAAAALAEAAQ"
+              "AGAAYAAAQSEAAFRFU2CWQlkqABAkUnCUEEADs=",
+      # 12195 partly cloudy at night
+      "12195": "data:image/gif;base64,R0lGODlhCAAIAIIAAAAAAAAAAERGRISGhMzOzPz+/AAAAAAAACH5BAUKAAAALAAAAA"
+               "AIAAgAAAMVCFqq842BUmCUbdK46MDAIwyNOA4JACH5BAUKAAAALAYAAQABAAEAAAMCSAkAIfkEBQoAAAAsBgABAA"
+               "EAAQAAAwJYCQAh+QQFCgAAACwGAAEAAQABAAADAkgJACH5BAUKAAAALAYAAQABAAEAAAMCWAkAIfkEBQoAAAAsBg"
+               "ABAAEAAQAAAwJICQA7",
+      # 2283 cloudy
+      "2283": "data:image/gif;base64,R0lGODlhCAAIAIIAAAAAAAAAAERCRGxubKSipMTGxOTm5AAAACH5BAUKAAAALAAAAQ"
+              "AIAAYAAAMTCKoi7MKYVoqoleitxfgg1IxAAgAh+QQFCgAAACwAAAEACAAGAAADEQiqAQJNhGcmKI+tbfeAm5MAAC"
+              "H5BAUKAAAALAEAAQAGAAYAAAMNCKoBLQEKUGZbbuKrEgAh+QQFCgAAACwCAAEABgAGAAADDQiqAS0BClBmW27iqx"
+              "IAIfkEBQoAAAAsAwACAAUABQAAAwsIARIhoDRAFayLJgAh+QQFCgAAACwEAAIABAAFAAADCQgBEgJlAfWmTAAh+Q"
+              "QFCgAAACwFAAIAAgAFAAADBggREioqAQAh+QQFCgAAACwGAAIAAgAFAAADBggREioqAQAh+QQFCgAAACwHAAMAAQ"
+              "ADAAADAhiaACH5BAUKAAAALAAAAgABAAQAAAMDKEWSACH5BAUKAAAALAAAAQACAAYAAAMHKGBaQEOoBAAh+QQFCg"
+              "AAACwBAAEAAgAGAAADByhgWkBDqAQAIfkEBQoAAAAsAAABAAQABgAAAwsYIAvGAJQISByQJQAh+QQFCgAAACwAAA"
+              "EABQAGAAADDQgBom2iAVDmJHZIBhIAIfkEBQoAAAAsAAABAAYABgAAAw8IECAdzojiVFGYYDCqcgkAIfkEBQoAAA"
+              "AsAQABAAYABgAAAw8IECAdzojiVFGYYDCqcgkAOw==",
+      # 17056 fog
+      "17056": "data:image/gif;base64,R0lGODlhCAAIAIEAAAAAAAAAAMzOzAAAACH5BAUyAAAALAAAAQAIAAUAAAIJhH6gy2"
+               "jOIkoFACH5BAUyAAAALAEAAQAGAAUAAAIIDA6Cm8anUCgAOw==",
+      # 2284 rainy
+      "2284": "data:image/gif;base64,R0lGODlhCAAIAIMAAAAAAAAAACRCzERCRERSjGxubKSipMTGxOTm5AAAAAAAAAAAAA"
+              "AAAAAAAAAAAAAAACH5BAUUAAAALAAAAAAIAAgAAAQbEEg5BrUDoXrO6J0hjuJQnKglVKswvTAByEAEACH5BAUUAA"
+              "AALAEABQAGAAMAAAQJkIwhiQjhXswjACH5BAUUAAAALAEABQAGAAMAAAQKcAAxKAHgEoG5iAAh+QQFFAAAACwBAA"
+              "UABgADAAAEChAAMkEAImRaSQQAIfkEBRQAAAAsAQAFAAYAAwAABAlwyBkCsTUIHSIAOw==",
+      # 2289 snowy
+      "2289": "data:image/gif;base64,R0lGODlhCAAIAIIAAAAAAAAAAERCRGxubKSipMTGxOTm5AAAACH5BAUKAAAALAAAAA"
+              "AIAAgAAAMXCKoi7MKYVoqoleitxfgg1IxLuRgKqiQAIfkEBQoAAAAsAQAFAAYAAwAAAwdoImrxML4EACH5BAUKAA"
+              "AALAEABQAGAAIAAAMGKAAqts8kACH5BAUKAAAALAEABQAGAAMAAAMIaLAa60EBZRIAIfkEBQoAAAAsAQAFAAYAAw"
+              "AAAwcouhbeLoYEACH5BAUKAAAALAEABQAGAAMAAAMICGBqoeCxBhIAIfkEBQoAAAAsAQAFAAYAAwAAAwcouhHWr8"
+              "kEACH5BAUKAAAALAEABQAGAAMAAAMIaAC6EAuyZRIAIfkEBQoAAAAsAQAFAAYAAwAAAwcouhbRLroEADs=",
+      # 2288 stormy
+      "2288": "data:image/gif;base64,R0lGODlhCAAIAIMAAAAAAAAAADQyNERCRGxqbIRyRKyurMTGxNSqLPzSBAAAAAAAAA"
+              "AAAAAAAAAAAAAAACH5BAUyAAAALAAAAAAIAAYAAAQWEEgpBLXinGqM6B0hjmI1COcJVKwVAQAh+QQFAgAAACwEAA"
+              "MAAQABAAAEArBEACH5BAUCAAAALAMAAwAEAAIAAAQHECAAihgiAgAh+QQFAgAAACwCAAMAAwADAAAEBxCABBAoMg"
+              "IAIfkEBQoAAAAsAgAEAAIAAgAABAQQpIQiACH5BAUCAAAALAMAAwACAAMAAAQFEBQAUooAIfkEBQIAAAAsAgAEAA"
+              "MAAwAABAYQFAkqSBEAIfkEBQIAAAAsAwAFAAIAAwAABAWwIAASiAAh+QQFAgAAACwEAAMAAQAEAAAEBJAAgCIAIf"
+              "kEBQIAAAAsAwAEAAQABAAABAdQDAmqrchGACH5BAUCAAAALAIABQADAAEAAAQDUMgIACH5BAUCAAAALAMABgACAA"
+              "IAAAQEEJQCIgA7",
+      # 21686 thermometer, cold
+      "21686": "data:image/gif;base64,R0lGODlhCAAIAIMAAAAAAAAAAADD/wDM/wzd/y/V/0/e/3Hn/////wAAAAAAAAAAAA"
+               "AAAAAAAAAAAAAAACH5BAUKAAAALAAAAAAIAAgAAAQZEKAJakUHXY2MtlLBUQjxXUM6IkJ7SpQVAQAh+QQFCgAAAC"
+               "wCAAEAAQABAAAEAjBEACH5BAUKAAAALAIAAgABAAEAAAQCMEQAIfkEBQoAAAAsAgADAAEAAQAABAIwRAAh+QQFMg"
+               "AAACwCAAQAAQABAAAEAjBEADs=",
+      # 21685 thermometer, warm
+      "21685": "data:image/gif;base64,R0lGODlhCAAIAIMAAAAAAAAAANoAAOIIAOoTAPMaAPMeAP8vAP/+/v///wAAAAAAAA"
+               "AAAAAAAAAAAAAAACH5BAUKAAAALAAAAAAIAAgAAAQXEAAk67wgpUstpdr2eUMJJoigdhLiWhEAIfkEBQoAAAAsAg"
+               "AEAAEAAQAABAKQRAAh+QQFCgAAACwCAAMAAQABAAAEAtBEACH5BAUKAAAALAIAAgABAAEAAAQC8EQAIfkEBTIAAA"
+               "AsAAAAAAUACAAABBEQgCRnoRanKzdNQphg0zQCEQA7",
+      # 1167 dropfall
+      "1167": "data:image/gif;base64,R0lGODlhCAAIAIMAAAAAAAAAAAx6tAyGxBSCxBSm9Ey+/JzW9Kze/Lzi/Pz+/AAAAA"
+              "AAAAAAAAAAAAAAACH5BAUKAAAALAIAAAADAAEAAAQEUJQSAQAh+QQFCgAAACwBAAAABQACAAAEB1AUkwyQBUQAIf"
+              "kEBQoAAAAsAQAAAAUAAwAABAkQgKSSKBNfHAEAIfkEBQoAAAAsAwABAAMAAQAABATQABMBACH5BAUKAAAALAEAAA"
+              "AFAAQAAAQMEAAjZVJJFJOoLkAEACH5BAUKAAAALAEAAAAFAAUAAAQOMBSTgpgq3ZQvNVZRBBEAIfkEBQoAAAAsAQ"
+              "AAAAUABgAABBAQSAOCTFZqkFQShZFQYAFEACH5BAUKAAAALAEAAAAFAAcAAAQREAQJKjDUJMtBUolQaJhYABEAIf"
+              "kEBQoAAAAsAQABAAUABwAABBQwBCNDMdSaE8RVx1AgoGcklFcEEQAh+QQFCgAAACwBAAAABQAIAAAEEzDIGQy1sh"
+              "isTyCacoCICBaJEQEAIfkEBQoAAAAsAQABAAUABwAABA4QgCBrpbSaKU+2QKIkEQAh+QQFCgAAACwBAAIABQAFAA"
+              "AECjDIGQy1shisU4gAIfkEBQoAAAAsAQADAAUABQAABAsQgCBrpbSWCUwKEQAh+QQFCgAAACwCAAQAAwAEAAAEBx"
+              "AEAIq8wEQAIfkEBQoAAAAsAgAFAAMAAwAABAUQBECljAAh+QQFCgAAACwDAAYAAQABAAAEAjBEACH5BAUeAAAALA"
+              "MABwABAAEAAAQCMEQAOw==",
+      # 3363 windsock
+      "3363": "data:image/gif;base64,R0lGODlhCAAIAIIAAAAAAAAAAISGhPQCFPz+/AAAAAAAAAAAACH5BAUUAAAALAEAAA"
+              "AGAAgAAAMOODTQ+isq0Sqt4FqceQIAIfkEBRQAAAAsBAAAAAEAAwAAAwNIEAkAIfkEBRQAAAAsBQAAAAEAAwAAAw"
+              "M4EAkAIfkEBRQAAAAsBgAAAAEAAwAAAwNIEAkAIfkEBRQAAAAsBAAAAAEAAwAAAwMYQAkAIfkEBRQAAAAsBQAAAA"
+              "EAAwAAAwMYMAkAOw=="
+    }
+    # Open-Meteo, no key needed: the current weather and the day's low and high. Plain HTTP, as the
+    # weather is no secret: an encrypted connection needs more memory in one piece than a TC001
+    # beside other scripts has.
     var units = {"km/h": "kmh", "m/s": "ms", "mph": "mph", "kn": "kn"}
     self.unit = store.get("wind")
     self.deg = "C"
@@ -42,7 +135,7 @@ class Weather
     var lon = re.search("-?[0-9]+[.,]?[0-9]*", str(store.get("lon")))
     self.url = nil
     if lat != nil && lon != nil
-      self.url = "https://api.open-meteo.com/v1/forecast?latitude=" + string.replace(lat[0], ",", ".") +
+      self.url = "http://api.open-meteo.com/v1/forecast?latitude=" + string.replace(lat[0], ",", ".") +
                  "&longitude=" + string.replace(lon[0], ",", ".") +
                  "&current=temperature_2m,relative_humidity_2m,is_day,weather_code,wind_speed_10m,wind_direction_10m" +
                  "&daily=temperature_2m_max,temperature_2m_min&forecast_days=1&timezone=auto" +
@@ -99,9 +192,9 @@ class Weather
   end
 
   # What the pages show, worked out once, never in draw(): the sky's icon and overlay, and for each
-  # page the first and second half (nil for none), each a list of ways to write it, the first that
-  # fits is drawn: [0, cells] at twice the size, [1, pieces] in the small font, or [2, cells, unit]
-  # with the unit small beside them.
+  # page its first and second half (nil for none), each [colour, full, short, unit]: full and short
+  # as cells for big() 16 rows high, the short one for when the full one does not fit, and the unit
+  # small beside them; 8 rows high texts for text() instead, and no unit.
   def build()
     var v = self.wx
     var day = v[2] > 0
@@ -130,32 +223,26 @@ class Weather
     var hi = str(round(v[6]))
     var lo = str(round(v[7]))
     var dir = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"][(int(v[5]) * 2 + 45) / 90 % 8]
-    # The day's low and high in one line where it fits at twice the size, else 16 rows high the low
-    # and then the high, each at twice the size; 8 rows high one line in the small font.
-    var both = self.cells(lo + "'" + d + "/", B) + self.cells(hi + "'" + d, R)
-    var minmax = [[[1, [[lo + "°" + d, B], ["/", fg], [hi + "°" + d, R]]],
-                   [1, [[lo + "°", B], ["/", fg], [hi + "°" + d, R]]],
-                   [1, [[lo, B], ["/", fg], [hi + "°" + d, R]]],
-                   [1, [[lo, B], ["/", fg], [hi, R]]]], nil]
     if self.tall
-      minmax = self.big(both, 0, 0, false) <= width() - 18 ? [[[0, both]], nil] :
-               [[[0, self.cells(lo + "'" + d, B)], [0, self.cells(lo + "'", B)], [1, [[lo + "°" + d, B]]]],
-                [[0, self.cells(hi + "'" + d, R)], [0, self.cells(hi + "'", R)], [1, [[hi + "°" + d, R]]]]]
+      # The day's low and then the high: in one line they never fit at twice the size.
+      self.slots = [[[tc, self.cells(t + "'" + d), self.cells(t + "'"), nil], nil],
+                    [[B, self.cells(lo + "'" + d), self.cells(lo + "'"), nil], [R, self.cells(hi + "'" + d), self.cells(hi + "'"), nil]],
+                    [[fg, self.cells(h + "%"), nil, nil], nil],
+                    [[fg, self.cells(w), nil, self.unit], [fg, self.cells(dir), nil, nil]]]
+    else
+      self.slots = [[[tc, t + "°" + d, t + "°"], nil],
+                    [[fg, [[lo, B], ["/", fg], [hi + "°" + d, R]], [[lo, B], ["/", fg], [hi, R]]], nil],
+                    [[fg, h + "%", nil], nil],
+                    [[fg, w + self.unit, w], [fg, dir, nil]]]
     end
-    self.slots = [
-      [[[0, self.cells(t + "'" + d, tc)], [0, self.cells(t + "'", tc)], [1, [[t + "°" + d, tc]]], [1, [[t + "°", tc]]]], nil],
-      minmax,
-      [[[0, self.cells(h + "%", fg)], [1, [[h + "%", fg]]]], nil],
-      [[[2, self.cells(w, fg), self.unit], [0, self.cells(w, fg)], [1, [[w + self.unit, fg]]], [1, [[w, fg]]]],
-       [[0, self.cells(dir, fg)], [1, [[dir, fg]]]]]]
   end
 
-  # A string of "0123456789:-'%/NESWCF" as cells for big(), all in colour c.
-  def cells(s, c)
+  # A string of "0123456789:-'%/NESWCF" as cells for big().
+  def cells(s)
     var out = []
     var i = 0
     while i < size(s)
-      out.push([string.find("0123456789:-'%/NESWCF", s[i]), c])
+      out.push(string.find("0123456789:-'%/NESWCF", s[i]))
       i += 1
     end
     return out
@@ -222,7 +309,7 @@ class Weather
     # The page's icon: the sky; the thermometer, cold with the low and warm with the high; the drop;
     # the windsock.
     var o = self.tall ? 4 : 0
-    icon(k == 0 ? self.sky : (k == 1 ? (two[1] != nil && !second ? "21686" : "21685") : (k == 2 ? "1167" : "3363")), o, dy + o)
+    icon(self.gif[k == 0 ? self.sky : (k == 1 ? (two[1] != nil && !second ? "21686" : "21685") : (k == 2 ? "1167" : "3363"))], o, dy + o)
     var into = second ? ph - half : ph
     var off = 0
     var rows = self.tall ? 16 : 8
@@ -231,57 +318,54 @@ class Weather
     elif second && into < 400
       off = into * rows / 400 - rows
     end
-    var ways = two[second ? 1 : 0]
+    var w = two[second ? 1 : 0]
     var x0 = self.tall ? 18 : 9
     # The wind's direction in the middle of what is left beside the 8×8 icon
     if self.tall && k == 3 && second x0 = 12 end
     var aw = width() - x0
     var y = dy + off
     font("small")
-    var j = 0
-    while j < size(ways)
-      var w = ways[j]
-      var last = j == size(ways) - 1
-      if w[0] == 1
-        var tw = text_ink_width(w[1])
-        if tw <= aw || last
-          text(x0 + max(0, (aw - tw) / 2), y + (self.tall ? 10 : 6), w[1], self.fg)
-          return
-        end
-      elif self.tall
-        var bw = self.big(w[1], 0, 0, false)
-        var uw = w[0] == 2 ? text_ink_width(w[2]) + 2 : 0
-        if bw + uw <= aw
-          var x = x0 + (aw - bw - uw) / 2
-          self.big(w[1], x, y + 3, true)
-          if uw > 0 text(x + bw + 2, y + 13, w[2], 0x909090) end
-          return
-        end
+    var txt = w[1]
+    if self.tall
+      # At twice the size, the short one when the full one with its unit does not fit
+      var u = w[3]
+      var tw = self.big(txt, 0, 0, nil) + (u == nil ? 0 : text_ink_width(u) + 2)
+      if tw > aw && w[2] != nil
+        txt = w[2]
+        u = nil
+        tw = self.big(txt, 0, 0, nil)
       end
-      j += 1
+      var x = x0 + max(0, (aw - tw) / 2)
+      x += self.big(txt, x, y + 3, w[0]) + 2
+      if u != nil text(x, y + 13, u, 0x909090) end
+    else
+      if text_ink_width(txt) > aw && w[2] != nil txt = w[2] end
+      text(x0 + max(0, (aw - text_ink_width(txt)) / 2), y + 6, txt, w[0])
     end
   end
 
-  # Cells of the small font at twice its size from x, its cap top at y, 2 columns apart. Draws them
-  # when d is true; answers the width either way.
-  def big(cells, x, y, d)
+  # Cells of the small font at twice its size from x, its cap top at y, 2 columns apart, in colour c,
+  # or only measured when c is nil. Answers the width.
+  def big(cells, x, y, c)
     var w = 0
     var n = size(cells)
     var i = 0
     while i < n
-      var g = self.font2[cells[i][0]]
-      if d
-        var r = 2
-        while r < size(g)
+      var g = self.font[cells[i]]
+      var gw = g & 7
+      if c != nil
+        var r = 0
+        while r < 5
+          var bits = (g >> (3 + 5 * r)) & 31
           var b = 0
-          while b < g[0]
-            if g[r] & (1 << (g[0] - 1 - b)) rect_fill(x + w + b * 2, y + (g[1] + r - 2) * 2, 2, 2, cells[i][1]) end
+          while bits != 0 && b < gw
+            if bits & (1 << (gw - 1 - b)) rect_fill(x + w + b * 2, y + r * 2, 2, 2, c) end
             b += 1
           end
           r += 1
         end
       end
-      w += g[0] * 2 + (i + 1 < n ? 2 : 0)
+      w += gw * 2 + (i + 1 < n ? 2 : 0)
       i += 1
     end
     return w
