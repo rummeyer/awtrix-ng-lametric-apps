@@ -1,7 +1,7 @@
 # @name Weather
 # @desc The sky and temperature, the day's low and high, humidity and wind from Open-Meteo, as LaMetric's Weather
 # @author Oliver Rummeyer
-# @version 2.0
+# @version 2.1
 # @config lat text "Latitude" default="52.52"
 # @config lon text "Longitude" default="13.40"
 # @config page number "Each page" default=5 min=2 max=30 unit=s
@@ -106,11 +106,8 @@ elif code < 70 || (code >= 80 && code < 85) self.sky = "2284" self.fx = "rain"
 elif code < 90 self.sky = "2289" self.fx = "snow"
 else self.sky = "2288" self.fx = "thunder"
 end
-var B = 0x2E9BFF
-var R = 0xFF3020
 var fg = self.fg
-var tc = settings.get("temperatureColor")
-if tc == nil tc = fg end
+var G = 0x909090
 var d = self.deg
 var t = str(round(v[0]))
 var h = str(round(v[1]))
@@ -119,15 +116,15 @@ var hi = str(round(v[6]))
 var lo = str(round(v[7]))
 var dir = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"][(int(v[5]) * 2 + 45) / 90 % 8]
 if self.tall
-self.slots = [[[tc, self.cells(t + "'" + d), self.cells(t + "'"), nil], nil],
-[[B, self.cells(lo + "'" + d), self.cells(lo + "'"), nil], [R, self.cells(hi + "'" + d), self.cells(hi + "'"), nil]],
-[[fg, self.cells(h + "%"), nil, nil], nil],
-[[fg, self.cells(w), nil, self.unit], [fg, self.cells(dir), nil, nil]]]
+self.slots = [[[self.cells(t + "'" + d), self.cells(t + "'"), nil], nil],
+[[self.cells(lo + "'" + d), self.cells(lo + "'"), nil], [self.cells(hi + "'" + d), self.cells(hi + "'"), nil]],
+[[self.cells(h + "%"), nil, nil], nil],
+[[self.cells(w), nil, self.unit], [self.cells(dir), nil, nil]]]
 else
-self.slots = [[[tc, t + "°" + d, t + "°"], nil],
-[[fg, [[lo, B], ["/", fg], [hi + "°" + d, R]], [[lo, B], ["/", fg], [hi, R]]], nil],
-[[fg, h + "%", nil], nil],
-[[fg, w + self.unit, w], [fg, dir, nil]]]
+self.slots = [[[[[t, fg], ["°" + d, G]], [[t, fg], ["°", G]]], nil],
+[[[[lo, fg], ["°" + d, G]], [[lo, fg], ["°", G]]], [[[hi, fg], ["°" + d, G]], [[hi, fg], ["°", G]]]],
+[[[[h, fg], ["%", G]], nil], nil],
+[[[[w, fg], [self.unit, G]], [[w, fg]]], [[[dir, fg]], nil]]]
 end
 end
 def cells(s)
@@ -194,36 +191,38 @@ elif second && into < 400
 off = into * rows / 400 - rows
 end
 var w = two[second ? 1 : 0]
-var x0 = self.tall ? 18 : 9
+var x0 = self.tall ? 16 : 9                   # 8 rows high a dark column after the icon
 if self.tall && k == 3 && second x0 = 12 end
 var aw = width() - x0
 var y = dy + off
 font("small")
-var txt = w[1]
+var txt = w[0]
 if self.tall
-var u = w[3]
-var tw = self.big(txt, 0, 0, nil) + (u == nil ? 0 : text_ink_width(u) + 2)
-if tw > aw && w[2] != nil
-txt = w[2]
+var u = w[2]
+var tw = self.big(txt, 0, 0, false) + (u == nil ? 0 : text_ink_width(u) + 2)
+if tw > aw && w[1] != nil
+txt = w[1]
 u = nil
-tw = self.big(txt, 0, 0, nil)
+tw = self.big(txt, 0, 0, false)
 end
 var x = x0 + max(0, (aw - tw) / 2)
-x += self.big(txt, x, y + 3, w[0]) + 2
+x += self.big(txt, x, y + 3, true) + 2
 if u != nil text(x, y + 13, u, 0x909090) end
 else
-if text_ink_width(txt) > aw && w[2] != nil txt = w[2] end
-text(x0 + max(0, (aw - text_ink_width(txt)) / 2), y + 6, txt, w[0])
+if text_ink_width(txt) > aw && w[1] != nil txt = w[1] end
+text(x0 + max(0, (aw - text_ink_width(txt)) / 2), y + 6, txt)
 end
 end
-def big(cells, x, y, c)
+def big(cells, x, y, d)
 var w = 0
 var n = size(cells)
 var i = 0
 while i < n
-var g = self.font[cells[i]]
+var ci = cells[i]
+var g = self.font[ci]
 var gw = g & 7
-if c != nil
+if d
+var c = ci == 12 || ci == 13 || ci > 18 ? 0x909090 : self.fg
 var r = 0
 while r < 5
 var bits = (g >> (3 + 5 * r)) & 31

@@ -26,7 +26,7 @@ icons and its value, as on the LaMetric:
 | Icon | Shows |
 |---|---|
 | The sky: sunny 2282, night 2285, partly cloudy 2286 and at night 12195, cloudy 2283, fog 17056, rainy 2284, snowy 2289, stormy 2288 | the temperature, `14°C` |
-| A thermometer, cold 21686 with the low, warm 21685 with the high | the day's low and high: on the TC002 at twice the size, the low and halfway the high; on the TC001 in one line, `9/14°C` |
+| A thermometer, cold 21686 with the low, warm 21685 with the high | the day's low and halfway the high, sliding one after the other; on the TC002 at twice the size |
 | A falling drop, 1167 | the humidity |
 | A windsock, 3363 | the wind speed, halfway giving way to where it comes from, N, NE, E … |
 
@@ -65,10 +65,11 @@ source, so these copies leave out the comments, the indentation and the
 settings' help texts. [`tc001.py`](tc001.py) makes them from the scripts:
 run `python3 tc001.py` after changing one.
 
-They still cost about 11 KB (Clock) and 20 KB (Weather). Beside the Netatmo
-app, which takes 29 KB and needs a large piece of memory for its encrypted
+They still cost about 10 KB (Clock) and 21 KB (Weather). Beside the Netatmo
+app, which takes 25 KB and needs a large piece of memory for its encrypted
 connection, there is room for the Clock but not the Weather: with both,
-Netatmo cannot reach its server any more. If saving a script makes the
+Netatmo can hardly reach its server, and the clock runs so short of memory
+that it restarts. If saving a script makes the
 clock restart and keep the old version, delete the app, restart the clock
 and install it again.
 
@@ -84,12 +85,12 @@ On the **Apps** tab, the gear button on the app's row.
 | Weekday | on | The days of the week under the time. |
 | Week starts Monday | on | Off starts it on Sunday. |
 | Today / Other days | white / grey | The colours of the weekday bars, those of the Time app. |
-| Quiet hours | off, 23 to 8 h | Only HH:MM in the middle of the display, nothing else, across midnight too. |
+| Quiet hours | off, 23 to 8 h | The time without the weekday, and without seconds when the icon is off, across midnight too. |
 | Brightness | 1 % | Of the display while the Clock is shown in the quiet hours. The old brightness comes back as soon as the next app comes, also after a restart in between. |
 
 24 or 12 hours, the leading zero, the colon (steady, blinking or pulsing) and
-the time's colour are the clock's own time settings. The Clock stays as long
-as any app.
+the time's colour are the clock's own time settings. The time sits in the
+middle of everything right of the icon. The Clock stays as long as any app.
 
 **Weather**
 
@@ -102,8 +103,8 @@ as any app.
 | Rain and snow | off | The clock's rain, drizzle, snow and thunder overlay over the pages. |
 | Quiet hours | off, 23 to 8 h | Left out of the rotation between these hours, across midnight too. The weather keeps coming, so it is up to date in the morning. |
 
-Temperatures follow the clock's °C/°F setting, and the current one the
-clock's temperature colour where set. On the TC002 values are drawn at
+Temperatures follow the clock's °C/°F setting. The values are white, their
+units grey, centred right of the icon. On the TC002 values are drawn at
 twice the size where they fit, else in the small font. The last weather is
 kept over a restart; weather more than three hours old is left out of the
 rotation until a new one comes.
