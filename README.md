@@ -85,7 +85,7 @@ On the **Apps** tab, the gear button on the app's row.
 | Weekday | on | The days of the week under the time. |
 | Week starts Monday | on | Off starts it on Sunday. |
 | Today / Other days | white / grey | The colours of the weekday bars, those of the Time app. |
-| Quiet hours | off, 23 to 8 h | The time without the weekday, and without seconds when the icon is off, across midnight too. |
+| Quiet hours | off, 23 to 8 h | Only HH:MM in the middle of the display, without the flame, the seconds and the weekday, across midnight too. |
 | Brightness | 1 % | Of the display while the Clock is shown in the quiet hours. The old brightness comes back as soon as the next app comes, also after a restart in between. |
 
 24 or 12 hours, the leading zero, the colon (steady, blinking or pulsing) and

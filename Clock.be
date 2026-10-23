@@ -1,13 +1,13 @@
 # @name    Clock
 # @desc    The time beside LaMetric's flame with the weekday under it, as LaMetric's Alarm Clock
 # @author  Oliver Rummeyer
-# @version 2.2
+# @version 2.3
 # @config  showicon bool  "Icon"           default=true help="LaMetric's flame beside the time; off shows the time with seconds"
 # @config  weekday bool   "Weekday"        default=true help="The days of the week under the time"
 # @config  monday  bool   "Week starts Monday" default=true group="Weekday"
 # @config  today   color  "Today"          default=#FFFFFF group="Weekday"
 # @config  other   color  "Other days"     default=#666666 group="Weekday"
-# @config  quiet   bool   "Quiet hours"    default=false group="Quiet hours" help="The time without the weekday, and the display dimmed between these hours"
+# @config  quiet   bool   "Quiet hours"    default=false group="Quiet hours" help="Only the time, without the flame and the weekday, and the display dimmed between these hours"
 # @config  qfrom   number "From"           default=23 min=0 max=23 unit=h group="Quiet hours"
 # @config  qto     number "To"             default=8 min=0 max=23 unit=h group="Quiet hours"
 # @config  qdim    slider "Brightness"     default=1 min=0 max=100 unit=% group="Quiet hours" help="Of the whole display in the quiet hours; the old one comes back after them"
@@ -19,8 +19,8 @@ import math
 # its size beside the icon where the Time app has its calendar sheet; 8 rows high, as the TC001's,
 # the small font beside it. Without the icon the time with seconds across the display. 24 or 12 hours,
 # leading zero and the colon follow the clock's time settings. The time always in the middle of
-# what is left beside the icon. In the quiet hours HH:MM without the weekday, and the display
-# dimmed while it is shown.
+# what is left beside the icon. In the quiet hours only HH:MM in the middle of the display, and the
+# display dimmed while it is shown.
 class Clock
   var fg, tc, ic, io, tall, pc, hm, cells, cq, qnow, shown, sec, sep, font, wk, monday, today, other
 
@@ -126,7 +126,7 @@ class Clock
     var q = self.qnow
     var x0 = 0
     var aw = width()
-    if self.ic != nil
+    if self.ic != nil && !q
       # Everything right of the icon's square, 16 columns 16 rows high; else right of the 8×8 icon and
       # a dark column, so the two never touch
       x0 = self.tall ? 16 : 9

@@ -1,7 +1,7 @@
 # @name Clock
 # @desc The time beside LaMetric's flame with the weekday under it, as LaMetric's Alarm Clock
 # @author Oliver Rummeyer
-# @version 2.2
+# @version 2.3
 # @config showicon bool "Icon" default=true
 # @config weekday bool "Weekday" default=true
 # @config monday bool "Week starts Monday" default=true group="Weekday"
@@ -85,7 +85,7 @@ var h = height()
 var q = self.qnow
 var x0 = 0
 var aw = width()
-if self.ic != nil
+if self.ic != nil && !q
 x0 = self.tall ? 16 : 9
 aw = width() - x0
 icon(self.ic, self.io, self.io)
