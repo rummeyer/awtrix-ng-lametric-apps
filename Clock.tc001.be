@@ -1,7 +1,7 @@
 # @name Clock
 # @desc The time beside LaMetric's flame with the weekday under it, as LaMetric's Alarm Clock
 # @author Oliver Rummeyer
-# @version 2.1
+# @version 2.2
 # @config showicon bool "Icon" default=true
 # @config weekday bool "Weekday" default=true
 # @config monday bool "Week starts Monday" default=true group="Weekday"
@@ -48,17 +48,22 @@ return f > t ? (h >= f || h < t) : (h >= f && h < t)
 end
 def dim()
 var saved = store.get("bright", -1)
+var lvl = max(1, int(int(store.get("qdim")) * 255 / 100.0 + 0.5))
+var b = settings.get("brightness")
 if self.qnow && self.shown
 if saved < 0
-store.set("bright", settings.get("brightness"))
+if b == lvl b = store.get("day", b) end
+store.set("bright", b)
 store.set("auto", settings.get("autoBrightness") == true)
 settings.set("autoBrightness", false)
-settings.set("brightness", max(1, int(int(store.get("qdim")) * 255 / 100.0 + 0.5)))
+settings.set("brightness", lvl)
 end
 elif saved >= 0
 settings.set("brightness", saved)
 if store.get("auto", false) settings.set("autoBrightness", true) end
 store.set("bright", -1)
+elif !self.qnow && b != lvl && b != store.get("day")
+store.set("day", b)
 end
 end
 def loop()

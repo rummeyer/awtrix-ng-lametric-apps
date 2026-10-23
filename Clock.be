@@ -1,7 +1,7 @@
 # @name    Clock
 # @desc    The time beside LaMetric's flame with the weekday under it, as LaMetric's Alarm Clock
 # @author  Oliver Rummeyer
-# @version 2.1
+# @version 2.2
 # @config  showicon bool  "Icon"           default=true help="LaMetric's flame beside the time; off shows the time with seconds"
 # @config  weekday bool   "Weekday"        default=true help="The days of the week under the time"
 # @config  monday  bool   "Week starts Monday" default=true group="Weekday"
@@ -81,19 +81,26 @@ class Clock
 
   # The display's brightness in the quiet hours: dimmed while the Clock is on screen, the old one
   # kept in the store and back as soon as the next app comes, even across a restart in between.
+  # Outside the quiet hours the day's brightness is kept too: a restart that kept the dimmed display
+  # but lost the store would otherwise leave the dimmed one as the old one, for good.
   def dim()
     var saved = store.get("bright", -1)
+    var lvl = max(1, int(int(store.get("qdim")) * 255 / 100.0 + 0.5))
+    var b = settings.get("brightness")
     if self.qnow && self.shown
       if saved < 0
-        store.set("bright", settings.get("brightness"))
+        if b == lvl b = store.get("day", b) end
+        store.set("bright", b)
         store.set("auto", settings.get("autoBrightness") == true)
         settings.set("autoBrightness", false)
-        settings.set("brightness", max(1, int(int(store.get("qdim")) * 255 / 100.0 + 0.5)))
+        settings.set("brightness", lvl)
       end
     elif saved >= 0
       settings.set("brightness", saved)
       if store.get("auto", false) settings.set("autoBrightness", true) end
       store.set("bright", -1)
+    elif !self.qnow && b != lvl && b != store.get("day")
+      store.set("day", b)
     end
   end
 
