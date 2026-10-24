@@ -1,7 +1,7 @@
 # @name Weather
 # @desc The sky and temperature, the day's low and high, humidity and wind from Open-Meteo, as LaMetric's Weather
 # @author Oliver Rummeyer
-# @version 2.1
+# @version 2.2
 # @config lat text "Latitude" default="52.52"
 # @config lon text "Longitude" default="13.40"
 # @config page number "Each page" default=5 min=2 max=30 unit=s
@@ -199,7 +199,7 @@ font("small")
 var txt = w[0]
 if self.tall
 var u = w[2]
-var tw = self.big(txt, 0, 0, false) + (u == nil ? 0 : text_ink_width(u) + 2)
+var tw = self.big(txt, 0, 0, false) + (u == nil ? 0 : self.inkw([[u]]) + 2)
 if tw > aw && w[1] != nil
 txt = w[1]
 u = nil
@@ -209,9 +209,24 @@ var x = x0 + max(0, (aw - tw) / 2)
 x += self.big(txt, x, y + 3, true) + 2
 if u != nil text(x, y + 13, u, 0x909090) end
 else
-if text_ink_width(txt) > aw && w[1] != nil txt = w[1] end
-text(x0 + max(0, (aw - text_ink_width(txt)) / 2), y + 6, txt)
+if self.inkw(txt) > aw && w[1] != nil txt = w[1] end
+text(x0 + max(0, (aw - self.inkw(txt)) / 2), y + 6, txt)
 end
+end
+def inkw(pc)
+var w = -1
+for p : pc
+var s = p[0]
+var i = 0
+while i < size(s)
+var c = s[i]
+var ci = string.find("0123456789:-'%/NESWCF", c)
+if c == "\xc2" ci = 12 i += 1 end          # ° in UTF-8, two bytes
+w += (ci >= 0 ? self.font[ci] & 7 : text_ink_width(c)) + 1
+i += 1
+end
+end
+return w
 end
 def big(cells, x, y, d)
 var w = 0

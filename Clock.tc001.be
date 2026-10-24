@@ -1,7 +1,7 @@
 # @name Clock
 # @desc The time beside LaMetric's flame with the weekday under it, as LaMetric's Alarm Clock
 # @author Oliver Rummeyer
-# @version 2.3
+# @version 2.4
 # @config showicon bool "Icon" default=true
 # @config weekday bool "Weekday" default=true
 # @config monday bool "Week starts Monday" default=true group="Weekday"
@@ -141,7 +141,7 @@ pc[j][1] = j % 2 == 1 ? cc : c
 j += 1
 end
 font("small")
-text(x0 + max(0, (aw - text_ink_width(pc)) / 2), 6, pc)
+text(x0 + max(0, (aw - self.inkw(pc)) / 2), 6, pc)
 end
 if bar
 var sw = self.tall ? 4 : (self.ic != nil ? 2 : 3)
@@ -153,6 +153,17 @@ rect_fill(bx + j * (sw + 1), h - 1, sw, 1, j == today ? self.today : self.other)
 j += 1
 end
 end
+end
+def inkw(pc)
+var w = -1
+for p : pc
+var i = 0
+while i < size(p[0])
+w += (self.font[string.find("0123456789:-", p[0][i])] & 7) + 1
+i += 1
+end
+end
+return w
 end
 def big(cells, x, y, cg, d)
 var w = 0

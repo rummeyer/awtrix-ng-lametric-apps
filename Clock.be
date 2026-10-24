@@ -1,7 +1,7 @@
 # @name    Clock
 # @desc    The time beside LaMetric's flame with the weekday under it, as LaMetric's Alarm Clock
 # @author  Oliver Rummeyer
-# @version 2.3
+# @version 2.4
 # @config  showicon bool  "Icon"           default=true help="LaMetric's flame beside the time; off shows the time with seconds"
 # @config  weekday bool   "Weekday"        default=true help="The days of the week under the time"
 # @config  monday  bool   "Week starts Monday" default=true group="Weekday"
@@ -187,7 +187,7 @@ class Clock
         j += 1
       end
       font("small")
-      text(x0 + max(0, (aw - text_ink_width(pc)) / 2), 6, pc)
+      text(x0 + max(0, (aw - self.inkw(pc)) / 2), 6, pc)
     end
     if bar
       # Seven bars a row high along the bottom, a column apart: 4 wide 16 rows high, else 2 beside an
@@ -201,6 +201,20 @@ class Clock
         j += 1
       end
     end
+  end
+
+  # The pieces' width in the small font, from the font above with a column between characters;
+  # text_ink_width() answers more than text() draws, which put the time left of the middle.
+  def inkw(pc)
+    var w = -1
+    for p : pc
+      var i = 0
+      while i < size(p[0])
+        w += (self.font[string.find("0123456789:-", p[0][i])] & 7) + 1
+        i += 1
+      end
+    end
+    return w
   end
 
   # Cells of the small font at twice its size from x, its cap top at y: a gap of 2 between them,
