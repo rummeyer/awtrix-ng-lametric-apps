@@ -1,8 +1,8 @@
 # @name    Clock
-# @desc    The time beside LaMetric's flame with the weekday under it, as LaMetric's Alarm Clock
+# @desc    The time beside a flame with the weekday under it, in place of LaMetric's Alarm Clock
 # @author  Oliver Rummeyer
-# @version 2.4
-# @config  showicon bool  "Icon"           default=true help="LaMetric's flame beside the time; off shows the time with seconds"
+# @version 2.5
+# @config  showicon bool  "Icon"           default=true help="A flame beside the time; off shows the time with seconds"
 # @config  weekday bool   "Weekday"        default=true help="The days of the week under the time"
 # @config  monday  bool   "Week starts Monday" default=true group="Weekday"
 # @config  today   color  "Today"          default=#FFFFFF group="Weekday"
@@ -14,7 +14,7 @@
 import string
 import math
 
-# The time beside LaMetric's flame, 7756, with the days of the week under it, as LaMetric's Alarm
+# The time beside a flame, with the days of the week under it, in place of LaMetric's Alarm
 # Clock, laid out as the clock's own Time app: 16 rows high, as the TC002's, the small font at twice
 # its size beside the icon where the Time app has its calendar sheet; 8 rows high, as the TC001's,
 # the small font beside it. Without the icon the time with seconds across the display. 24 or 12 hours,

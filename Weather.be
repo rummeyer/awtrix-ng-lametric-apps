@@ -1,7 +1,7 @@
 # @name    Weather
-# @desc    The sky and temperature, the day's low and high, humidity and wind from Open-Meteo, as LaMetric's Weather
+# @desc    The sky and temperature, the day's low and high, humidity and wind from Open-Meteo, in place of LaMetric's Weather
 # @author  Oliver Rummeyer
-# @version 2.2
+# @version 2.3
 # @config  lat     text   "Latitude"       default="52.52"
 # @config  lon     text   "Longitude"      default="13.40"
 # @config  page    number "Each page"      default=5 min=2 max=30 unit=s help="How long each of the four pages stays"
@@ -13,7 +13,7 @@
 # @config  qto     number "To"             default=8 min=0 max=23 unit=h group="Quiet hours"
 import string
 
-# The weather from Open-Meteo, as LaMetric's Weather and with LaMetric's icons, a page each: the
+# The weather from Open-Meteo, in place of LaMetric's Weather, an icon and a value a page: the
 # sky with the temperature, a thermometer with the day's low and high, a drop with the humidity,
 # and a windsock with the wind speed giving way to where it comes from. The icons come with the
 # script and are drawn at their 8×8, 16 rows high, as on the TC002, in the middle of the 16×16
@@ -33,25 +33,22 @@ class Weather
     self.font = [60073275, 59262483, 59826491, 59040059, 8709419, 59040827, 60089403, 8659259, 60089659,
                  59041083, 262401, 57347, 794, 43008299, 34619659, 77950284, 59827259, 59040827, 89534861,
                  18122003, 34661435]
-    # LaMetric's icons by their number, made as small as GIFs go while they play the same: one
+    # The icons by name, made as small as GIFs go while they play the same: one
     # colour table, identical frames merged, each frame only what changed. Literals side by side are
     # one string, so each is held once.
     self.gif = {
-      # 2282 sunny
-      "2282": "data:image/gif;base64,R0lGODlhCAAIAIIAAAAAAAAAAExGBKSeBMzCBPz2BPz2lPz61CH5BAUCAAAALAAAAA"
+      "sunny": "data:image/gif;base64,R0lGODlhCAAIAIIAAAAAAAAAAExGBKSeBMzCBPz2BPz2lPz61CH5BAUCAAAALAAAAA"
               "AIAAgAAAMaCCBEoqCV0haZ5biLp5zHNDCh90gaATGOkgAAIfkEBQoAAAAsAgABAAQABgAAAwkIB8ylbL0HwUsAIf"
               "kEBQoAAAAsAQADAAYAAwAAAwh4UABaqskFEgAh+QQFCgAAACwBAAEABgAGAAADCwhQqtcLvBjnhDcBACH5BAUKAA"
               "AALAEAAQAFAAYAAAMLCHAKtfA19SQDhiUAIfkEBQoAAAAsAQADAAQABAAAAwhYsMfQC5SSAAAh+QQFCgAAACwBAA"
               "EABgAGAAADCwhQ2v7rLCDZVFIlADs=",
-      # 2285 night
-      "2285": "data:image/gif;base64,R0lGODlhCAAIAIMAAAAAAAAAAAQCFAQCHAQCLAQCNAQCRAQCVAQCZCwuLGxubLS2tP"
+      "night": "data:image/gif;base64,R0lGODlhCAAIAIMAAAAAAAAAAAQCFAQCHAQCLAQCNAQCRAQCVAQCZCwuLGxubLS2tP"
               "z+/AAAAAAAAAAAACH5BAUKAAAALAAAAAAIAAgAAAQYUMhJ6xrjYky670UohkZplkeqpgiytHAEACH5BAUKAAAALA"
               "AAAAAIAAgAAAQPEMiZQJ1SZcy7pZ8namEEACH5BAUKAAAALAAAAAAIAAgAAAQPEMipQJ0yZcy7pZ8namEEACH5BA"
               "UKAAAALAAAAAAIAAgAAAQQEMi5QJ1SyIG7txT4jYh0RQAh+QQFCgAAACwAAAAACAAIAAAEEBDIyUCdMmVMsJeXJX"
               "7kNkYAIfkEBQoAAAAsAAAAAAgACAAABBIQyLlAnVJlPLCXlyV+kvFpYwQAIfkEBQoAAAAsAAAAAAgACAAABBMQyJ"
               "lAnZJlTLCXlyV+0jEZ2xgBADs=",
-      # 2286 partly cloudy
-      "2286": "data:image/gif;base64,R0lGODlhCAAIAIMAAAAAAAAAAERCRFRWBGxSBGxubKSipMS+BMTGxOTm5Pz6BAAAAA"
+      "partly": "data:image/gif;base64,R0lGODlhCAAIAIMAAAAAAAAAAERCRFRWBGxSBGxubKSipMS+BMTGxOTm5Pz6BAAAAA"
               "AAAAAAAAAAAAAAACH5BAUKAAAALAAAAAAIAAgAAAQeEIBxzpCgKiXE7FySdAgilKWhrqpQvLDXzZ5EWVIEACH5BA"
               "UKAAAALAAAAQAIAAYAAAQTEEh5gABVqJvORRc1jUM4FdhoRQAh+QQFCgAAACwBAAEABgAGAAAEEBBIeYACQmUBEL"
               "8TcHBhNUUAIfkEBQoAAAAsAgABAAYABgAABBAQSBmAAuIIJQDq12R1YihFACH5BAUKAAAALAMAAgAFAAUAAAQNEC"
@@ -61,13 +58,11 @@ class Weather
               "AECFCAJBEwRcgIACH5BAUKAAAALAAAAQAEAAYAAAQNMAAxQaIAoAxMLhgVAQAh+QQFCgAAACwAAAEABQAGAAAEDx"
               "AEIGRNogKA9jZeoVFABAAh+QQFCgAAACwAAAEABgAGAAAEETCcIwSlKQm0kTdgWIxjZVoRACH5BAUKAAAALAEAAQ"
               "AGAAYAAAQSEAAFRFU2CWQlkqABAkUnCUEEADs=",
-      # 12195 partly cloudy at night
-      "12195": "data:image/gif;base64,R0lGODlhCAAIAIIAAAAAAAAAAERGRISGhMzOzPz+/AAAAAAAACH5BAUKAAAALAAAAA"
+      "partlynight": "data:image/gif;base64,R0lGODlhCAAIAIIAAAAAAAAAAERGRISGhMzOzPz+/AAAAAAAACH5BAUKAAAALAAAAA"
                "AIAAgAAAMVCFqq842BUmCUbdK46MDAIwyNOA4JACH5BAUKAAAALAYAAQABAAEAAAMCSAkAIfkEBQoAAAAsBgABAA"
                "EAAQAAAwJYCQAh+QQFCgAAACwGAAEAAQABAAADAkgJACH5BAUKAAAALAYAAQABAAEAAAMCWAkAIfkEBQoAAAAsBg"
                "ABAAEAAQAAAwJICQA7",
-      # 2283 cloudy
-      "2283": "data:image/gif;base64,R0lGODlhCAAIAIIAAAAAAAAAAERCRGxubKSipMTGxOTm5AAAACH5BAUKAAAALAAAAQ"
+      "cloudy": "data:image/gif;base64,R0lGODlhCAAIAIIAAAAAAAAAAERCRGxubKSipMTGxOTm5AAAACH5BAUKAAAALAAAAQ"
               "AIAAYAAAMTCKoi7MKYVoqoleitxfgg1IxAAgAh+QQFCgAAACwAAAEACAAGAAADEQiqAQJNhGcmKI+tbfeAm5MAAC"
               "H5BAUKAAAALAEAAQAGAAYAAAMNCKoBLQEKUGZbbuKrEgAh+QQFCgAAACwCAAEABgAGAAADDQiqAS0BClBmW27iqx"
               "IAIfkEBQoAAAAsAwACAAUABQAAAwsIARIhoDRAFayLJgAh+QQFCgAAACwEAAIABAAFAAADCQgBEgJlAfWmTAAh+Q"
@@ -76,40 +71,33 @@ class Weather
               "AAACwBAAEAAgAGAAADByhgWkBDqAQAIfkEBQoAAAAsAAABAAQABgAAAwsYIAvGAJQISByQJQAh+QQFCgAAACwAAA"
               "EABQAGAAADDQgBom2iAVDmJHZIBhIAIfkEBQoAAAAsAAABAAYABgAAAw8IECAdzojiVFGYYDCqcgkAIfkEBQoAAA"
               "AsAQABAAYABgAAAw8IECAdzojiVFGYYDCqcgkAOw==",
-      # 17056 fog
-      "17056": "data:image/gif;base64,R0lGODlhCAAIAIEAAAAAAAAAAMzOzAAAACH5BAUyAAAALAAAAQAIAAUAAAIJhH6gy2"
+      "fog": "data:image/gif;base64,R0lGODlhCAAIAIEAAAAAAAAAAMzOzAAAACH5BAUyAAAALAAAAQAIAAUAAAIJhH6gy2"
                "jOIkoFACH5BAUyAAAALAEAAQAGAAUAAAIIDA6Cm8anUCgAOw==",
-      # 2284 rainy
-      "2284": "data:image/gif;base64,R0lGODlhCAAIAIMAAAAAAAAAACRCzERCRERSjGxubKSipMTGxOTm5AAAAAAAAAAAAA"
+      "rain": "data:image/gif;base64,R0lGODlhCAAIAIMAAAAAAAAAACRCzERCRERSjGxubKSipMTGxOTm5AAAAAAAAAAAAA"
               "AAAAAAAAAAAAAAACH5BAUUAAAALAAAAAAIAAgAAAQbEEg5BrUDoXrO6J0hjuJQnKglVKswvTAByEAEACH5BAUUAA"
               "AALAEABQAGAAMAAAQJkIwhiQjhXswjACH5BAUUAAAALAEABQAGAAMAAAQKcAAxKAHgEoG5iAAh+QQFFAAAACwBAA"
               "UABgADAAAEChAAMkEAImRaSQQAIfkEBRQAAAAsAQAFAAYAAwAABAlwyBkCsTUIHSIAOw==",
-      # 2289 snowy
-      "2289": "data:image/gif;base64,R0lGODlhCAAIAIIAAAAAAAAAAERCRGxubKSipMTGxOTm5AAAACH5BAUKAAAALAAAAA"
+      "snow": "data:image/gif;base64,R0lGODlhCAAIAIIAAAAAAAAAAERCRGxubKSipMTGxOTm5AAAACH5BAUKAAAALAAAAA"
               "AIAAgAAAMXCKoi7MKYVoqoleitxfgg1IxLuRgKqiQAIfkEBQoAAAAsAQAFAAYAAwAAAwdoImrxML4EACH5BAUKAA"
               "AALAEABQAGAAIAAAMGKAAqts8kACH5BAUKAAAALAEABQAGAAMAAAMIaLAa60EBZRIAIfkEBQoAAAAsAQAFAAYAAw"
               "AAAwcouhbeLoYEACH5BAUKAAAALAEABQAGAAMAAAMICGBqoeCxBhIAIfkEBQoAAAAsAQAFAAYAAwAAAwcouhHWr8"
               "kEACH5BAUKAAAALAEABQAGAAMAAAMIaAC6EAuyZRIAIfkEBQoAAAAsAQAFAAYAAwAAAwcouhbRLroEADs=",
-      # 2288 stormy
-      "2288": "data:image/gif;base64,R0lGODlhCAAIAIMAAAAAAAAAADQyNERCRGxqbIRyRKyurMTGxNSqLPzSBAAAAAAAAA"
+      "storm": "data:image/gif;base64,R0lGODlhCAAIAIMAAAAAAAAAADQyNERCRGxqbIRyRKyurMTGxNSqLPzSBAAAAAAAAA"
               "AAAAAAAAAAAAAAACH5BAUyAAAALAAAAAAIAAYAAAQWEEgpBLXinGqM6B0hjmI1COcJVKwVAQAh+QQFAgAAACwEAA"
               "MAAQABAAAEArBEACH5BAUCAAAALAMAAwAEAAIAAAQHECAAihgiAgAh+QQFAgAAACwCAAMAAwADAAAEBxCABBAoMg"
               "IAIfkEBQoAAAAsAgAEAAIAAgAABAQQpIQiACH5BAUCAAAALAMAAwACAAMAAAQFEBQAUooAIfkEBQIAAAAsAgAEAA"
               "MAAwAABAYQFAkqSBEAIfkEBQIAAAAsAwAFAAIAAwAABAWwIAASiAAh+QQFAgAAACwEAAMAAQAEAAAEBJAAgCIAIf"
               "kEBQIAAAAsAwAEAAQABAAABAdQDAmqrchGACH5BAUCAAAALAIABQADAAEAAAQDUMgIACH5BAUCAAAALAMABgACAA"
               "IAAAQEEJQCIgA7",
-      # 21686 thermometer, cold
-      "21686": "data:image/gif;base64,R0lGODlhCAAIAIMAAAAAAAAAAADD/wDM/wzd/y/V/0/e/3Hn/////wAAAAAAAAAAAA"
+      "cold": "data:image/gif;base64,R0lGODlhCAAIAIMAAAAAAAAAAADD/wDM/wzd/y/V/0/e/3Hn/////wAAAAAAAAAAAA"
                "AAAAAAAAAAAAAAACH5BAUKAAAALAAAAAAIAAgAAAQZEKAJakUHXY2MtlLBUQjxXUM6IkJ7SpQVAQAh+QQFCgAAAC"
                "wCAAEAAQABAAAEAjBEACH5BAUKAAAALAIAAgABAAEAAAQCMEQAIfkEBQoAAAAsAgADAAEAAQAABAIwRAAh+QQFMg"
                "AAACwCAAQAAQABAAAEAjBEADs=",
-      # 21685 thermometer, warm
-      "21685": "data:image/gif;base64,R0lGODlhCAAIAIMAAAAAAAAAANoAAOIIAOoTAPMaAPMeAP8vAP/+/v///wAAAAAAAA"
+      "warm": "data:image/gif;base64,R0lGODlhCAAIAIMAAAAAAAAAANoAAOIIAOoTAPMaAPMeAP8vAP/+/v///wAAAAAAAA"
                "AAAAAAAAAAAAAAACH5BAUKAAAALAAAAAAIAAgAAAQXEAAk67wgpUstpdr2eUMJJoigdhLiWhEAIfkEBQoAAAAsAg"
                "AEAAEAAQAABAKQRAAh+QQFCgAAACwCAAMAAQABAAAEAtBEACH5BAUKAAAALAIAAgABAAEAAAQC8EQAIfkEBTIAAA"
                "AsAAAAAAUACAAABBEQgCRnoRanKzdNQphg0zQCEQA7",
-      # 1167 dropfall
-      "1167": "data:image/gif;base64,R0lGODlhCAAIAIMAAAAAAAAAAAx6tAyGxBSCxBSm9Ey+/JzW9Kze/Lzi/Pz+/AAAAA"
+      "drop": "data:image/gif;base64,R0lGODlhCAAIAIMAAAAAAAAAAAx6tAyGxBSCxBSm9Ey+/JzW9Kze/Lzi/Pz+/AAAAA"
               "AAAAAAAAAAAAAAACH5BAUKAAAALAIAAAADAAEAAAQEUJQSAQAh+QQFCgAAACwBAAAABQACAAAEB1AUkwyQBUQAIf"
               "kEBQoAAAAsAQAAAAUAAwAABAkQgKSSKBNfHAEAIfkEBQoAAAAsAwABAAMAAQAABATQABMBACH5BAUKAAAALAEAAA"
               "AFAAQAAAQMEAAjZVJJFJOoLkAEACH5BAUKAAAALAEAAAAFAAUAAAQOMBSTgpgq3ZQvNVZRBBEAIfkEBQoAAAAsAQ"
@@ -119,8 +107,7 @@ class Weather
               "AECjDIGQy1shisU4gAIfkEBQoAAAAsAQADAAUABQAABAsQgCBrpbSWCUwKEQAh+QQFCgAAACwCAAQAAwAEAAAEBx"
               "AEAIq8wEQAIfkEBQoAAAAsAgAFAAMAAwAABAUQBECljAAh+QQFCgAAACwDAAYAAQABAAAEAjBEACH5BAUeAAAALA"
               "MABwABAAEAAAQCMEQAOw==",
-      # 3363 windsock
-      "3363": "data:image/gif;base64,R0lGODlhCAAIAIIAAAAAAAAAAISGhPQCFPz+/AAAAAAAAAAAACH5BAUUAAAALAEAAA"
+      "windsock": "data:image/gif;base64,R0lGODlhCAAIAIIAAAAAAAAAAISGhPQCFPz+/AAAAAAAAAAAACH5BAUUAAAALAEAAA"
               "AGAAgAAAMOODTQ+isq0Sqt4FqceQIAIfkEBRQAAAAsBAAAAAEAAwAAAwNIEAkAIfkEBRQAAAAsBQAAAAEAAwAAAw"
               "M4EAkAIfkEBRQAAAAsBgAAAAEAAwAAAwNIEAkAIfkEBRQAAAAsBAAAAAEAAwAAAwMYQAkAIfkEBRQAAAAsBQAAAA"
               "EAAwAAAwMYMAkAOw=="
@@ -151,7 +138,7 @@ class Weather
     self.wat = now_ms()
     self.slots = nil
     self.fx = nil
-    self.sky = "2283"
+    self.sky = "cloudy"
     if self.wx != nil self.build() end
     self.t0 = 0
     self.ticks = 0
@@ -201,16 +188,16 @@ class Weather
     var day = v[2] > 0
     var code = int(v[3])
     self.fx = nil
-    # The sky as LaMetric's icon: sunny or night, partly cloudy by day or night, cloudy, fog, rain,
+    # The sky's icon: sunny or night, partly cloudy by day or night, cloudy, fog, rain,
     # snow and thunder
-    if code <= 1 self.sky = day ? "2282" : "2285"
-    elif code == 2 self.sky = day ? "2286" : "12195"
-    elif code == 3 self.sky = "2283"
-    elif code < 50 self.sky = "17056"
-    elif code < 60 self.sky = "2284" self.fx = "drizzle"
-    elif code < 70 || (code >= 80 && code < 85) self.sky = "2284" self.fx = "rain"
-    elif code < 90 self.sky = "2289" self.fx = "snow"
-    else self.sky = "2288" self.fx = "thunder"
+    if code <= 1 self.sky = day ? "sunny" : "night"
+    elif code == 2 self.sky = day ? "partly" : "partlynight"
+    elif code == 3 self.sky = "cloudy"
+    elif code < 50 self.sky = "fog"
+    elif code < 60 self.sky = "rain" self.fx = "drizzle"
+    elif code < 70 || (code >= 80 && code < 85) self.sky = "rain" self.fx = "rain"
+    elif code < 90 self.sky = "snow" self.fx = "snow"
+    else self.sky = "storm" self.fx = "thunder"
     end
     var fg = self.fg
     var G = 0x909090
@@ -307,7 +294,7 @@ class Weather
     # The page's icon: the sky; the thermometer, cold with the low and warm with the high; the drop;
     # the windsock.
     var o = self.tall ? 4 : 0
-    icon(self.gif[k == 0 ? self.sky : (k == 1 ? (two[1] != nil && !second ? "21686" : "21685") : (k == 2 ? "1167" : "3363"))], o, dy + o)
+    icon(self.gif[k == 0 ? self.sky : (k == 1 ? (two[1] != nil && !second ? "cold" : "warm") : (k == 2 ? "drop" : "windsock"))], o, dy + o)
     var into = second ? ph - half : ph
     var off = 0
     var rows = self.tall ? 16 : 8

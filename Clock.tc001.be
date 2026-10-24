@@ -1,7 +1,7 @@
 # @name Clock
-# @desc The time beside LaMetric's flame with the weekday under it, as LaMetric's Alarm Clock
+# @desc The time beside a flame with the weekday under it, in place of LaMetric's Alarm Clock
 # @author Oliver Rummeyer
-# @version 2.4
+# @version 2.5
 # @config showicon bool "Icon" default=true
 # @config weekday bool "Weekday" default=true
 # @config monday bool "Week starts Monday" default=true group="Weekday"
