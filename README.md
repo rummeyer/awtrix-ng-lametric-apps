@@ -5,7 +5,7 @@ TC002 or TC001, in place of the LaMetric Time's
 [Alarm Clock](https://apps.lametric.com/apps/alarm_clock), without the alarm,
 and [Weather](https://apps.lametric.com/apps/weather).
 
-**Clock** ([`Clock.be`](Clock.be)): the time beside LaMetric's flame, 7756,
+**Clock** ([`Clock.be`](Clock.be)): the time beside a flame, with
 the days of the week under it, laid out as the clock's own Time app. On the
 TC002 the flame takes the place of the Time app's calendar sheet, and the
 time the same double-size digits beside it:
@@ -20,18 +20,18 @@ time the same double-size digits beside it:
 On the TC001 the time is in the small font beside it. With the icon
 switched off it shows the time with seconds across the whole display.
 
-**Weather** ([`Weather.be`](Weather.be)): four pages, each one of LaMetric's
-icons and its value, as on the LaMetric:
+**Weather** ([`Weather.be`](Weather.be)): four pages, each an icon and its
+value, as on the LaMetric:
 
 | Icon | Shows |
 |---|---|
-| The sky: sunny 2282, night 2285, partly cloudy 2286 and at night 12195, cloudy 2283, fog 17056, rainy 2284, snowy 2289, stormy 2288 | the temperature, `14°C` |
-| A thermometer, cold 21686 with the low, warm 21685 with the high | the day's low and halfway the high, sliding one after the other; on the TC002 at twice the size |
-| A falling drop, 1167 | the humidity |
-| A windsock, 3363 | the wind speed, halfway giving way to where it comes from, N, NE, E … |
+| The sky: sunny, night, partly cloudy by day and at night, cloudy, fog, rain, snow, thunder | the temperature, `14°C` |
+| A thermometer, cold with the low, warm with the high | the day's low and halfway the high, sliding one after the other; on the TC002 at twice the size |
+| A falling drop | the humidity |
+| A windsock | the wind speed, halfway giving way to where it comes from, N, NE, E … |
 
 The icons come with the scripts, made as small as GIFs go while they play
-the same, about 7 KB for all of them; nothing is fetched from LaMetric or
+the same, about 7 KB for all of them; nothing is fetched or
 installed. On the TC002 they stand in the middle of the 16×16 square and the
 values are twice the size of the small font where they fit; on the TC001 the
 small font. Halfway through a page with two values the first slides out at
@@ -81,7 +81,7 @@ On the **Apps** tab, the gear button on the app's row.
 
 | Setting | Default | |
 |---|---|---|
-| Icon | on | LaMetric's flame beside the time. Off shows the time with seconds. |
+| Icon | on | A flame beside the time. Off shows the time with seconds. |
 | Weekday | on | The days of the week under the time. |
 | Week starts Monday | on | Off starts it on Sunday. |
 | Today / Other days | white / grey | The colours of the weekday bars, those of the Time app. |
@@ -111,7 +111,6 @@ rotation until a new one comes.
 
 ## Licence
 
-MIT. The icons are from the [LaMetric icon gallery](https://developer.lametric.com/icons)
-and belong to their authors; the double-size digits are the clock's small font
+MIT, for the code. The double-size digits are the clock's small font
 (SIL OFL 1.1, see the AWTRIX NG font notices); the weather is by
 [Open-Meteo](https://open-meteo.com) (CC BY 4.0).
