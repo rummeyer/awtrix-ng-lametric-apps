@@ -1,7 +1,7 @@
 # @name Clock
 # @desc The time beside a flame with the weekday under it, in place of LaMetric's Alarm Clock
 # @author Oliver Rummeyer
-# @version 2.5
+# @version 2.6
 # @config showicon bool "Icon" default=true
 # @config weekday bool "Weekday" default=true
 # @config monday bool "Week starts Monday" default=true group="Weekday"
@@ -141,7 +141,7 @@ pc[j][1] = j % 2 == 1 ? cc : c
 j += 1
 end
 font("small")
-text(x0 + max(0, (aw - self.inkw(pc)) / 2), 6, pc)
+text(x0 + max(0, (aw - self.inkw(pc) + 1) / 2), 6, pc)
 end
 if bar
 var sw = self.tall ? 4 : (self.ic != nil ? 2 : 3)
