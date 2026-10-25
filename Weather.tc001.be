@@ -1,7 +1,7 @@
 # @name Weather
 # @desc The sky and temperature, the day's low and high, humidity and wind from Open-Meteo, in place of LaMetric's Weather
 # @author Oliver Rummeyer
-# @version 2.3
+# @version 2.4
 # @config lat text "Latitude" default="52.52"
 # @config lon text "Longitude" default="13.40"
 # @config page number "Each page" default=5 min=2 max=30 unit=s
@@ -205,12 +205,12 @@ txt = w[1]
 u = nil
 tw = self.big(txt, 0, 0, false)
 end
-var x = x0 + max(0, (aw - tw) / 2)
+var x = x0 + max(0, (aw - tw + 1) / 2)
 x += self.big(txt, x, y + 3, true) + 2
 if u != nil text(x, y + 13, u, 0x909090) end
 else
 if self.inkw(txt) > aw && w[1] != nil txt = w[1] end
-text(x0 + max(0, (aw - self.inkw(txt)) / 2), y + 6, txt)
+text(x0 + max(0, (aw - self.inkw(txt) + 1) / 2), y + 6, txt)
 end
 end
 def inkw(pc)

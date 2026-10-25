@@ -180,7 +180,7 @@ class Clock
       # With seconds a narrower gap at the colons, as the Time app's big face
       var cg = size(pc) > 3 ? 1 : 2
       var tw = self.big(cells, 0, 0, cg, false)
-      self.big(cells, x0 + (aw - tw) / 2, bar ? 2 : 3, cg, true)
+      self.big(cells, x0 + (aw - tw + 1) / 2, bar ? 2 : 3, cg, true)
     else
       while j < size(pc)
         pc[j][1] = j % 2 == 1 ? cc : c
