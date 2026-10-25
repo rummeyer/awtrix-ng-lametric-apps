@@ -1,7 +1,7 @@
 # @name    Clock
 # @desc    The time beside a flame with the weekday under it, in place of LaMetric's Alarm Clock
 # @author  Oliver Rummeyer
-# @version 2.6
+# @version 2.7
 # @config  showicon bool  "Icon"           default=true help="A flame beside the time; off shows the time with seconds"
 # @config  weekday bool   "Weekday"        default=true help="The days of the week under the time"
 # @config  monday  bool   "Week starts Monday" default=true group="Weekday"
@@ -194,7 +194,8 @@ class Clock
       # Seven bars a row high along the bottom, a column apart: 4 wide 16 rows high, else 2 beside an
       # icon and 3 without.
       var sw = self.tall ? 4 : (self.ic != nil ? 2 : 3)
-      var bx = x0 + max(0, (aw - 7 * sw - 6) / 2)
+      # An odd column left over on the left, as for the time: under it, not a column left of it.
+      var bx = x0 + max(0, (aw - 7 * sw - 6 + 1) / 2)
       var today = self.monday ? (weekday() + 6) % 7 : weekday()
       j = 0
       while j < 7
