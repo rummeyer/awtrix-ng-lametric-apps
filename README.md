@@ -17,6 +17,8 @@ time the same double-size digits beside it:
  └────────┘ ▬▬ ▬▬ ██ ▬▬ ▬▬ ▬▬ ▬▬
 ```
 
+<img src="docs/clock-tc002.gif" alt="The Clock app on a TC002: a flickering flame, 14:35 in large digits, the weekdays under them with Tuesday lit" width="520">
+
 On the TC001 the time is in the small font beside it. With the icon
 switched off it shows the time with seconds across the whole display.
 
@@ -29,6 +31,8 @@ value, as on the LaMetric:
 | A thermometer, cold with the low, warm with the high | the day's low and halfway the high, sliding one after the other; on the TC002 at twice the size |
 | A falling drop | the humidity |
 | A windsock | the wind speed, halfway giving way to where it comes from, N, NE, E … |
+
+<img src="docs/weather-tc002.gif" alt="The Weather app on a TC002: a cloud and 7°C, the thermometers with the day's low and high, the drop with 64 %, the windsock with the wind" width="520">
 
 The icons come with the scripts, made as small as GIFs go while they play
 the same, about 7 KB for all of them; nothing is fetched or
